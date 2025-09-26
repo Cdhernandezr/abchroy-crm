@@ -1,11 +1,15 @@
-// app/layout.tsx
+//app/layout.tsx
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import QueryProvider from '@/components/providers/QueryProvider' // Importamos el proveedor
+import { Plus_Jakarta_Sans } from 'next/font/google' // Importamos la fuente optimizada
+import './globals.css' // **LA LÍNEA MÁS IMPORTANTE: Importa todos nuestros estilos**
+import QueryProvider from '@/components/providers/QueryProvider'
 import { Toaster } from 'react-hot-toast'
 
-const inter = Inter({ subsets: ['latin'] })
+// Configuración de la fuente
+const jakarta = Plus_Jakarta_Sans({ 
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+})
 
 export const metadata: Metadata = {
   title: 'CRM Kanban',
@@ -18,12 +22,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        {/* Envolvemos la app con el QueryProvider */}
+    <html lang="es">
+      {/* Aplicamos la clase de la fuente al body */}
+      <body className={jakarta.className}>
         <QueryProvider>
           {children}
-          <Toaster position="top-right" /> {/* 2. Añadir el componente Toaster */}
+          <Toaster position="top-right" />
         </QueryProvider>
       </body>
     </html>

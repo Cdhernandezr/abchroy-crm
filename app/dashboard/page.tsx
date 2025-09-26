@@ -1,3 +1,4 @@
+/* app/dashboard/page.tsx */
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -7,7 +8,8 @@ import { useQuery } from '@tanstack/react-query'
 import KanbanBoard from '@/components/KanbanBoard'
 import MetricsDashboard from '@/components/MetricsDashboard'
 import LogoutButton from '@/components/LogoutButton'
-import { LayoutDashboard } from 'lucide-react' // Ícono para el estado vacío
+import { LayoutDashboard } from 'lucide-react' 
+import styles from './Dashboard.module.css'
 
 export default function DashboardPage() {
   const supabase = createClient()
@@ -94,26 +96,26 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="p-4 sm:p-6 lg:p-8 bg-gray-900 text-white min-h-screen">
+        <main className="p-4 sm:p-6 lg:p-8 min-h-screen">
       <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-        <h1 className="text-3xl font-bold">Dashboard de Ventas</h1>
-        
-        {/* Selector de Pipeline */}
-        <div className="flex items-center">
-          <label htmlFor="pipeline-select" className="text-sm text-gray-400 mr-2">Pipeline:</label>
-          <select 
-            id="pipeline-select"
-            value={selectedPipelineId || ''}
-            onChange={(e) => setSelectedPipelineId(e.target.value)}
-            className="bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          >
-            {data.pipelines.map(pipeline => (
-              <option key={pipeline.id} value={pipeline.id}>{pipeline.name}</option>
-            ))}
-          </select>
+        <h1 className="text-3xl font-bold text-brand-light">Dashboard de Ventas</h1>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center">
+            <label htmlFor="pipeline-select" className="text-sm text-brand-muted mr-2">Pipeline:</label>
+            <select
+              id="pipeline-select"
+              value={selectedPipelineId || ''}
+              onChange={(e) => setSelectedPipelineId(e.target.value)}
+              // FIX: Apply the new style
+              className={styles.pipelineSelect}
+            >
+              {data.pipelines.map(pipeline => (
+                <option key={pipeline.id} value={pipeline.id}>{pipeline.name}</option>
+              ))}
+            </select>
+          </div>
+          <LogoutButton />
         </div>
-        
-        <LogoutButton />
       </div>
       
       <MetricsDashboard deals={data.deals} />

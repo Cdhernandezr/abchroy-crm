@@ -1,9 +1,9 @@
-// components/LogoutButton.tsx
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { LogOut } from 'lucide-react'
+import styles from './LogoutButton.module.css' // Importar estilos
 
 export default function LogoutButton() {
   const supabase = createClient()
@@ -15,11 +15,8 @@ export default function LogoutButton() {
   }
 
   return (
-    <button 
-      onClick={handleLogout}
-      className="flex items-center text-sm text-gray-300 hover:text-white"
-    >
-      <LogOut size={16} className="mr-2" />
+    <button onClick={handleLogout} className={styles.logoutButton}>
+      <LogOut size={16} />
       Cerrar Sesión
     </button>
   )
