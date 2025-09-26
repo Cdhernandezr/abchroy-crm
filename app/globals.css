@@ -1,0 +1,31 @@
+
+/* app/globals.css */
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+:root {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-brand-dark: #0B0A26;
+    --color-brand-darker: #121040;
+    --color-brand-primary: #7278F2;
+    --color-brand-accent: #F28F16;
+    --color-brand-light: #F2F2F2;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
