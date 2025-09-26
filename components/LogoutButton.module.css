@@ -1,0 +1,23 @@
+.logoutButton {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--brand-muted);
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logoutButton:hover {
+  background-color: rgba(114, 120, 242, 0.1); /* brand-accent con transparencia */
+  color: var(--brand-light);
+  border-color: rgba(114, 120, 242, 0.2);
+}
+
+.logoutButton svg {
+  margin-right: 8px;
+}

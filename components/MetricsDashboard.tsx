@@ -3,6 +3,9 @@
 
 import { FC, useMemo } from 'react'
 import { TrendingUp, Target, DollarSign, Clock } from 'lucide-react'
+// Importamos los nuevos estilos
+import styles from './MetricsDashboard.module.css'
+
 
 type Deal = {
   value: number | null;
@@ -16,14 +19,15 @@ interface MetricsDashboardProps {
 }
 
 const MetricCard: FC<{ title: string; value: string; icon: React.ReactNode }> = ({ title, value, icon }) => (
-  <div className="bg-gray-800 p-4 rounded-lg flex items-center">
-    <div className="bg-gray-700 p-3 rounded-full mr-4">{icon}</div>
+  <div className={styles.card}>
+    <div className={styles.iconWrapper}>{icon}</div>
     <div>
-      <p className="text-sm text-gray-400">{title}</p>
-      <p className="text-2xl font-bold">{value}</p>
+      <p className={styles.label}>{title}</p>
+      <p className={styles.value}>{value}</p>
     </div>
   </div>
 )
+
 
 const MetricsDashboard: FC<MetricsDashboardProps> = ({ deals }) => {
   // Usamos useMemo para que las métricas solo se recalculen si los 'deals' cambian
@@ -58,7 +62,7 @@ const MetricsDashboard: FC<MetricsDashboardProps> = ({ deals }) => {
   }, [deals])
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div className={styles.grid}>
       <MetricCard title="Tasa de Conversión" value={metrics.conversionRate} icon={<Target size={24} />} />
       <MetricCard title="Valor Total Ganado" value={metrics.totalValueWon} icon={<DollarSign size={24} />} />
       <MetricCard title="Ciclo de Venta Promedio" value={metrics.averageSalesCycle} icon={<Clock size={24} />} />

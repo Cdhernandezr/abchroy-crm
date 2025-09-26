@@ -1,0 +1,83 @@
+.column {
+  background-color: var(--brand-dark-blue);
+  opacity: 0.8; /* Efecto traslúcido como en el mockup */
+  width: 300px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  border: 1px solid rgba(242, 242, 242, 0.05);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s ease;
+}
+
+.dragOver {
+  border-color: var(--brand-accent);
+}
+
+.header {
+  padding: 12px;
+  border-bottom: 1px solid rgba(242, 242, 242, 0.1);
+  position: sticky;
+  top: 0;
+  background-color: var(--brand-dark-blue);
+  border-radius: 16px 16px 0 0;
+  z-index: 10;
+}
+
+.title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: var(--brand-muted);
+}
+
+.badge {
+  font-size: 11px;
+  background-color: #1d1d4b; /* Color del mockup */
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: var(--brand-muted);
+  border: 1px solid rgba(242, 242, 242, 0.06);
+}
+
+.value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand-primary);
+  margin-top: 4px;
+}
+
+.content {
+  padding: 8px;
+  flex-grow: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.addDealButton {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 8px;
+  margin-top: 8px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--brand-muted);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.addDealButton:hover {
+  background-color: rgba(114, 120, 242, 0.1);
+  color: var(--brand-light);
+}
+
+.addDealButton svg {
+  margin-right: 8px;
+}

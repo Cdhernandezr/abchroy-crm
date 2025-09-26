@@ -1,0 +1,33 @@
+/* app/login/LoginPage.module.css */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.loginBox {
+  width: 100%;
+  max-width: 450px;
+  padding: 32px;
+  background-color: var(--brand-dark-blue);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  border: 1px solid rgba(242, 242, 242, 0.1);
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 8px;
+  color: var(--brand-light);
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 14px;
+  color: var(--brand-muted);
+  margin-bottom: 24px;
+}

@@ -1,47 +1,50 @@
-// components/StageColumn.tsx
+'use client'
+
 import { FC } from 'react'
 import { useDroppable } from '@dnd-kit/core'
-import { User } from '@supabase/supabase-js';
+import styles from './StageColumn.module.css'
+import { Plus } from 'lucide-react'
 
-// No necesitamos importar DealCard aquí porque se renderiza desde el componente padre.
-
-// Tipos de datos que necesita la columna para su cabecera
-type UserProfile = { id: string; name: string | null; avatar: string | null };
-type Deal = { id: string; value: number | null; }
-type Stage = { id: string; name: string }
+// --- Type Definitions ---
+type UserProfile = { id: string; name: string | null; avatar: string | null; };
+type Deal = { id: string; title: string; value: number | null; owner_id: string | null; };
+type Stage = { id: string; name: string; };
 
 interface StageColumnProps {
   stage: Stage;
-  deals: Deal[]; // Aún recibimos deals para calcular el total
-  users: UserProfile[]; // Recibimos los usuarios para pasarlos a DealCard
-  children: React.ReactNode; // Recibimos los componentes a renderizar
+  deals: Deal[];
+  users: UserProfile[];
+  children: React.ReactNode;
+  // FIX: Add the onAddDeal prop type
+  onAddDeal: () => void;
 }
 
-const StageColumn: FC<StageColumnProps> = ({ stage, deals, children }) => {
-  const { setNodeRef } = useDroppable({
-    id: stage.id,
-  })
-
-  // Calculamos el valor total de la columna
-  const totalValue = deals.reduce((sum, deal) => sum + (deal.value || 0), 0)
+const StageColumn: FC<StageColumnProps> = ({ stage, deals, users, children, onAddDeal }) => {
+  const { setNodeRef, isOver } = useDroppable({ id: stage.id });
+  const totalValue = deals.reduce((sum, deal) => sum + (deal.value || 0), 0);
+  const columnClasses = `${styles.column} ${isOver ? styles.dragOver : ''}`;
 
   return (
-    <div ref={setNodeRef} className="bg-gray-900/50 w-72 flex-shrink-0 rounded-xl flex flex-col" style={{ height: 'calc(100vh - 120px)' }}>
-      {/* Cabecera de la Columna */}
-      <div className="p-3 border-b border-gray-700 flex-shrink-0">
-        <h2 className="font-bold text-md">{stage.name} ({deals.length})</h2>
-        <p className="text-xs text-gray-400">
-          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalValue)}
+    <div ref={setNodeRef} className={columnClasses}>
+      <div className={styles.header}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span className={styles.title}>{stage.name}</span>
+          <span className={styles.badge}>{deals.length}</span>
+        </div>
+        <p className={styles.value}>
+          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(totalValue)}
         </p>
       </div>
-
-      {/* Contenido de la Columna (Tarjetas y Botón) */}
-      <div className="p-2 space-y-2 overflow-y-auto">
-        {/* Aquí renderizamos lo que nos pasa el componente padre */}
+      <div className={styles.content}>
         {children}
+        {/* FIX: Connect the onClick event to the onAddDeal prop */}
+        <button onClick={onAddDeal} className={styles.addDealButton}>
+          <Plus size={16} />
+          Añadir oportunidad
+        </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default StageColumn
+export default StageColumn;

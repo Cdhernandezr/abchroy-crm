@@ -1,0 +1,40 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.card {
+  background-color: rgba(18, 16, 64, 0.5); /* Usamos el azul oscuro con transparencia */
+  border: 1px solid rgba(242, 242, 242, 0.1);
+  padding: 16px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.iconWrapper {
+  background-color: rgba(114, 120, 242, 0.1); /* brand-accent con transparencia */
+  color: var(--brand-accent);
+  padding: 12px;
+  border-radius: 50%;
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.label {
+  font-size: 12px;
+  color: var(--brand-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--brand-light);
+  margin-top: 4px;
+}

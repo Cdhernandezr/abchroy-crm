@@ -1,0 +1,6 @@
+.boardContainer {
+  display: flex;
+  gap: 16px; /* Espacio entre columnas */
+  overflow-x: auto; /* Permite el scroll horizontal */
+  padding-bottom: 16px; /* Espacio inferior para la barra de scroll */
+}
