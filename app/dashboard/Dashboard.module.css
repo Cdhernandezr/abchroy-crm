@@ -1,0 +1,20 @@
+.pipelineSelect {
+  background-color: var(--brand-dark-blue);
+  border: 1px solid rgba(114, 120, 242, 0.2); /* brand-accent/20 */
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--brand-light);
+  font-weight: 600;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%237278F2' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+.pipelineSelect:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--brand-accent);
+}

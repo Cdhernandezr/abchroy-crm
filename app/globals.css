@@ -1,31 +1,29 @@
+/* Importamos la fuente 'Plus Jakarta Sans' desde Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-/* app/globals.css */
-@import "tailwindcss";
-
+/* Definimos tu paleta de colores como variables CSS nativas */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-:root {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-brand-dark: #0B0A26;
-    --color-brand-darker: #121040;
-    --color-brand-primary: #7278F2;
-    --color-brand-accent: #F28F16;
-    --color-brand-light: #F2F2F2;
-  }
+  --brand-dark: #0B0A26;
+  --brand-dark-blue: #121040;
+  --brand-accent: #7278F2;
+  --brand-primary: #F28F16;
+  --brand-light: #F2F2F2;
+  --brand-muted: rgba(242, 242, 242, 0.72);
+  --brand-card: #14133a;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--brand-dark);
+  color: var(--brand-light);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  margin: 0;
+  
+  /* Gradientes de fondo tomados del mockup */
+  background-image: radial-gradient(1200px 800px at 110% -10%, rgba(115,113,255,.13), transparent 60%),
+                    radial-gradient(900px 700px at -10% 120%, rgba(254,162,15,.12), transparent 60%),
+                    linear-gradient(180deg, var(--brand-bg) 0%, var(--brand-panel) 100%);
+}
+
+* {
+  box-sizing: border-box;
 }
