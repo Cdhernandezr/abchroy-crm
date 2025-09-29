@@ -1,10 +1,4 @@
-<<<<<<< HEAD
-//app/page.tsx
 'use client'
-=======
-// app/page.tsx
-import Image from "next/image";
->>>>>>> 31c589e1111cee983490d1889851d0c09853b79f
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
