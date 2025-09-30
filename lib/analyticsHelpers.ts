@@ -6,6 +6,7 @@ export type Stage = { pipeline_id: string; id: string; name: string; order: numb
 export type UserProfile = { avatar: string | null; id: string; name: string | null; };
 export type Account = { id: string; name: string; sector: string | null; };
 export type Goal = { year: number; months: { [key: string]: number } };
+export type PipelineInfo = {id: string; name: string; }
 
 // --- Funciones de Procesamiento de Datos ---
 const getDealStatus = (deal: Deal, stages: Stage[]): 'won' | 'lost' | 'open' => {
