@@ -15,7 +15,7 @@ export const SalesTrendChart: React.FC<SalesTrendChartProps> = ({ data }) => {
           label: 'Valor Ganado',
           data: data.data,
           borderColor: '#FEA20F', // --brand-primary
-          backgroundColor: (context: any) => {
+          backgroundColor: (context: { chart: { ctx: CanvasRenderingContext2D } }) => {
             const ctx = context.chart.ctx;
             const gradient = ctx.createLinearGradient(0, 0, 0, 250);
             gradient.addColorStop(0, 'rgba(254, 162, 15, 0.4)');
