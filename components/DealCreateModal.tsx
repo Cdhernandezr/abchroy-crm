@@ -1,7 +1,7 @@
 // components/DealEditModal.tsx
 'use client'
 
-import { FC, Fragment, useEffect } from 'react'
+import { FC, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'

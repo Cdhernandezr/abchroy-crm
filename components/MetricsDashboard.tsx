@@ -2,7 +2,6 @@
 'use client'
 
 import { FC, useMemo } from 'react'
-import { TrendingUp, Target, DollarSign, Clock, Package } from 'lucide-react'
 import styles from './MetricsDashboard.module.css'
 import type { Deal, Stage } from '@/lib/analyticsHelpers'
 
@@ -74,15 +73,5 @@ const MetricsDashboard: FC<MetricsDashboardProps> = ({ deals, stages }) => {
     </div>
   )
 }
-
-/*   return (
-    <div className={styles.grid}>
-      <MetricCard 
-        title="Oportunidades" 
-        value={metrics.totalOpportunities} 
-        deltaText={metrics.createdTodayText} 
-        icon={<Package size={24} />} 
-      /> */
-
 
 export default MetricsDashboard

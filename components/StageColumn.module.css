@@ -99,3 +99,40 @@
 .addDealButton svg {
   margin-right: 8px;
 }
+
+.ownerList {
+  display: flex;
+  margin-top: 8px; /* Espacio debajo del título */
+  margin-bottom: 8px;
+}
+
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: -8px; /* Para que los avatares se superpongan */
+  border: 2px solid var(--column-bg); /* Un borde que combine con el fondo de la columna */
+  flex-shrink: 0;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.moreOwnersBadge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--color-gray);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  margin-left: 4px;
+  flex-shrink: 0;
+}
