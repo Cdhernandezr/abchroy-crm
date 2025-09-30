@@ -40,7 +40,7 @@ export default function LoginPage() {
                   inputPlaceholder: 'var(--brand-muted)',
                 },
                 radii: {
-                  borderRadius: '12px',
+                  inputBorderRadius: '12px',
                   buttonBorderRadius: '12px',
                 }
               }
