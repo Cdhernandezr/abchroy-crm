@@ -1,0 +1,86 @@
+/* app/analytics/Analytics.module.css */
+
+.main {
+  padding: 16px 24px 32px;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--brand-light);
+}
+
+.backLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--brand-muted);
+  background-color: var(--brand-dark-blue);
+  border: 1px solid rgba(114, 120, 242, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.backLink:hover {
+  background-color: rgba(114, 120, 242, 0.1);
+  color: var(--brand-light);
+}
+
+.chartsGrid {
+  display: grid;
+  /*
+    Grid responsive: En pantallas grandes, 2 columnas.
+    En pantallas más pequeñas, se ajustará a 1 columna.
+  */
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 16px;
+}
+
+/* Hacemos que algunos gráficos ocupen dos columnas en pantallas grandes */
+.spanFull {
+  grid-column: 1 / -1;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.pipelineSelect {
+  background-color: var(--brand-dark-blue);
+  border: 1px solid rgba(114, 120, 242, 0.2); /* brand-accent con transparencia */
+  border-radius: 12px;
+  padding: 8px 12px;
+  color: var(--brand-light);
+  font-weight: 600;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%237278F2' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+.pipelineSelect:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--brand-accent);
+}

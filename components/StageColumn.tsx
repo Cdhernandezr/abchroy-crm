@@ -4,11 +4,7 @@ import { FC } from 'react'
 import { useDroppable } from '@dnd-kit/core'
 import styles from './StageColumn.module.css'
 import { Plus } from 'lucide-react'
-
-// --- Type Definitions ---
-type UserProfile = { id: string; name: string | null; avatar: string | null; };
-type Deal = { id: string; title: string; value: number | null; owner_id: string | null; };
-type Stage = { id: string; name: string; };
+import type { Deal, Stage, UserProfile } from '@/lib/analyticsHelpers'
 
 interface StageColumnProps {
   stage: Stage;

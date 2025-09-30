@@ -1,0 +1,27 @@
+/* components/analytics/ChartCard.module.css */
+
+.card {
+  /* Usamos el mismo estilo de las columnas del Kanban para consistencia */
+  background: linear-gradient(180deg, rgba(23, 25, 61, 0.9), rgba(13, 10, 53, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px; /* --radius del mockup */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  color: var(--brand-muted);
+  margin-bottom: 16px;
+}
+
+.content {
+  flex-grow: 1;
+  position: relative; /* Necesario para que el gráfico se ajuste correctamente */
+  min-height: 250px; /* Asegura una altura mínima para los gráficos */
+}

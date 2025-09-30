@@ -1,40 +1,53 @@
+/* components/MetricsDashboard.module.css */
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  margin-bottom: 32px;
+  /* Usamos auto-fit para que sea responsive */
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px; /* --gap del mockup */
 }
 
 .card {
-  background-color: rgba(18, 16, 64, 0.5); /* Usamos el azul oscuro con transparencia */
-  border: 1px solid rgba(242, 242, 242, 0.1);
-  padding: 16px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
+  position: relative;
+  border-radius: 16px; /* --radius del mockup */
+  background: linear-gradient(180deg, rgba(20, 19, 58, 0.9), rgba(13, 10, 53, 0.9));
+  box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.03);
+  padding: 14px 16px;
+  overflow: hidden; /* Necesario para el efecto de brillo */
 }
 
-.iconWrapper {
-  background-color: rgba(114, 120, 242, 0.1); /* brand-accent con transparencia */
-  color: var(--brand-accent);
-  padding: 12px;
-  border-radius: 50%;
-  margin-right: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Efecto de brillo del mockup */
+.card::after {
+  content: "";
+  position: absolute;
+  inset: -40% -40% auto auto;
+  height: 160%;
+  width: 60%;
+  transform: rotate(35deg);
+  background: radial-gradient(closest-side, rgba(115, 113, 255, 0.22), transparent 70%);
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 .label {
   font-size: 12px;
-  color: var(--brand-muted);
-  text-transform: uppercase;
   letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--brand-muted);
 }
 
 .value {
   font-size: 28px;
   font-weight: 800;
-  color: var(--brand-light);
   margin-top: 4px;
+  color: var(--brand-text);
+}
+
+.delta {
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.delta.up {
+  color: var(--brand-success);
 }

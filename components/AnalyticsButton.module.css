@@ -1,0 +1,23 @@
+.analyticsButton {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--brand-muted);
+  background-color: var(--brand-dark-blue);
+  border: 1px solid rgba(114, 120, 242, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.analyticsButton:hover {
+  background-color: rgba(114, 120, 242, 0.1);
+  color: var(--brand-light);
+}
+
+.analyticsButton svg {
+  margin-right: 8px;
+}

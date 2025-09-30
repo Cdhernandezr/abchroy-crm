@@ -3,22 +3,24 @@
 
 /* Definimos tu paleta de colores como variables CSS nativas */
 :root {
-  --brand-dark: #0B0A26;
-  --brand-dark-blue: #121040;
-  --brand-accent: #7278F2;
-  --brand-primary: #F28F16;
-  --brand-light: #F2F2F2;
-  --brand-muted: rgba(242, 242, 242, 0.72);
+  --brand-bg: #0D0A35;
+  --brand-panel: #000000;
   --brand-card: #14133a;
+  --brand-text: #FFFFFF;
+  --brand-muted: rgba(255, 255, 255, 0.72);
+  --brand-primary: #FEA20F; /* Naranja */
+  --brand-accent: #7371FF;  /* Índigo */
+  --brand-success: #4CE5B1;
+  --brand-danger: #FF6B6B;
 }
 
 body {
-  background-color: var(--brand-dark);
-  color: var(--brand-light);
+  background-color: var(--brand-panel);
+  color: var(--brand-text);
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   margin: 0;
   
-  /* Gradientes de fondo tomados del mockup */
+  /* Replicamos los gradientes de fondo del mockup para un look premium */
   background-image: radial-gradient(1200px 800px at 110% -10%, rgba(115,113,255,.13), transparent 60%),
                     radial-gradient(900px 700px at -10% 120%, rgba(254,162,15,.12), transparent 60%),
                     linear-gradient(180deg, var(--brand-bg) 0%, var(--brand-panel) 100%);

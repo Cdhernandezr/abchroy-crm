@@ -1,16 +1,20 @@
+/* components/DealCard.module.css */
+
 .card {
-  background-color: var(--brand-card);
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(242, 242, 242, 0.1);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  background: linear-gradient(180deg, rgba(28, 29, 70, 0.96), rgba(20, 19, 58, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  border-radius: 12px; /* --radius-sm del mockup */
+  padding: 10px;
+  margin: 8px 4px;
   cursor: grab;
-  transition: all 0.2s ease-in-out;
+  transition: transform .18s ease, box-shadow .18s ease;
+  position: relative;
 }
 
 .card:hover {
   transform: translateY(-3px);
-  border-color: var(--brand-accent);
+  box-shadow: 0 10px 30px rgba(254, 162, 15, 0.18); /* Sombra naranja al hacer hover */
 }
 
 .card:active {
@@ -18,17 +22,30 @@
 }
 
 .title {
+  margin: 0 0 6px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--brand-light);
-  margin: 0 0 8px 0;
+  color: var(--brand-text);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: var(--brand-muted);
+  font-size: 12px;
+}
+
+.tag {
+  background: #1a1b4a;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 3px 8px;
 }
 
 .value {
-  font-size: 12px;
-  font-weight: 700;
   color: var(--brand-primary);
-  margin-top: 4px;
+  font-weight: 800;
 }
 
 .owner {

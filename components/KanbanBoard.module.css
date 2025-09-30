@@ -4,3 +4,11 @@
   overflow-x: auto; /* Permite el scroll horizontal */
   padding-bottom: 16px; /* Espacio inferior para la barra de scroll */
 }
+
+.boardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px; 
+  padding-bottom: 16px;
+  align-items: start; 
+}

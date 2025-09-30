@@ -7,18 +7,16 @@ import { createClient } from '@/lib/supabase/client'
 import StageColumn from './StageColumn'
 import DealCard from './DealCard'
 import DealEditModal from './DealEditModal'
-import DealCreateModal from './DealCreateModal' // Make sure this is imported
+import DealCreateModal from './DealCreateModal' 
+import styles from './KanbanBoard.module.css'
+import type { Deal, Stage, UserProfile, Account } from '@/lib/analyticsHelpers'
 
-// --- Type definitions (no changes) ---
-type UserProfile = { id: string; name: string | null; avatar: string | null; };
-type Deal = { id: string; title: string; value: number | null; owner_id: string | null; stage_id: string; pain: string | null; };
-type Stage = { id: string; name: string; pipeline_id: string; order: number; };
-type Account = { id: string; name: string; };
-interface KanbanBoardProps { pipelineId: string; allStages: Stage[]; allDeals: Deal[]; allUsers: UserProfile[]; allAccounts: Account[]; }
 
-const KanbanBoard: FC<KanbanBoardProps> = ({ pipelineId, allStages, allDeals, allUsers, allAccounts }) => {
+interface KanbanBoardProps { pipelineId: string; initialDeals: Deal[]; allStages: Stage[]; allDeals: Deal[]; allUsers: UserProfile[]; allAccounts: Account[]; }
+
+const KanbanBoard: FC<KanbanBoardProps> = ({ pipelineId, initialDeals, allStages, allDeals, allUsers, allAccounts }) => {
   // --- States (no changes) ---
-  const [deals, setDeals] = useState(allDeals)
+  const [deals, setDeals] = useState(initialDeals)
   const [activeDeal, setActiveDeal] = useState<Deal | null>(null)
   
   // --- Edit Modal States (no changes) ---
@@ -31,17 +29,36 @@ const KanbanBoard: FC<KanbanBoardProps> = ({ pipelineId, allStages, allDeals, al
 
   // --- Hooks and Mutations (no changes) ---
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
-  useEffect(() => { setDeals(allDeals) }, [allDeals]);
+  useEffect(() => { setDeals(initialDeals) }, [initialDeals]);
   const supabase = createClient();
   const queryClient = useQueryClient();
   const updateDealStage = useMutation({
-    mutationFn: async ({ dealId, newStageId }: { dealId: string; newStageId: string }) => {
-      const { error } = await supabase.from('deals').update({ stage_id: newStageId }).eq('id', dealId);
-      if (error) throw new Error(error.message);
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['kanban-data'] }),
-    onError: () => setDeals(allDeals)
-  });
+  mutationFn: async ({ dealId, newStageId }: { dealId: string; newStageId: string }) => {
+    const stage = allStages.find(s => s.id === newStageId);
+    const isClosingStage = stage?.std_map === 'Ganado' || stage?.std_map === 'Perdido';
+
+    // CORRECCIÓN: Este es el nuevo objeto de actualización. Es mucho más simple.
+    const updatePayload: {
+      stage_id: string;
+      status: string;
+      closed_at: string | null;
+    } = {
+      stage_id: newStageId,
+      status: isClosingStage ? 'Cerrada' : 'Abierta',
+      closed_at: isClosingStage ? new Date().toISOString() : null,
+    };
+    
+    // NUNCA MÁS MODIFICAMOS EL 'value'
+    const { error } = await supabase.from('deals').update(updatePayload).eq('id', dealId);
+    if (error) throw new Error(error.message);
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['kanban-data'] });
+  },
+  onError: () => {
+    setDeals(initialDeals);
+  }
+});
 
   // --- Event Handlers ---
   const handleDragStart = (event: DragStartEvent) => {
@@ -55,7 +72,11 @@ const KanbanBoard: FC<KanbanBoardProps> = ({ pipelineId, allStages, allDeals, al
     if (over && active.id !== over.id) {
       const activeDealId = active.id as string;
       const newStageId = over.id as string;
+      
+      // La actualización optimista no necesita cambiar.
+      // La mutación se encargará de la lógica de negocio.
       setDeals(prev => prev.map(deal => deal.id === activeDealId ? { ...deal, stage_id: newStageId } : deal));
+      
       updateDealStage.mutate({ dealId: activeDealId, newStageId });
     }
   };
@@ -79,7 +100,8 @@ const KanbanBoard: FC<KanbanBoardProps> = ({ pipelineId, allStages, allDeals, al
   return (
     <>
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '16px' }}>
+        {/* 2. Reemplazamos el div anterior por el que usa nuestro estilo de grid */}
+        <div className={styles.boardGrid}>
           {stagesForPipeline.map(stage => {
             const dealsForStage = deals.filter(deal => deal.stage_id === stage.id);
             return (
@@ -88,7 +110,6 @@ const KanbanBoard: FC<KanbanBoardProps> = ({ pipelineId, allStages, allDeals, al
                 stage={stage}
                 deals={dealsForStage}
                 users={allUsers}
-                // FIX: Pass the function to open the modal
                 onAddDeal={() => handleOpenCreateModal(stage.id)}
               >
                 {dealsForStage.map(deal => {
@@ -116,7 +137,6 @@ const KanbanBoard: FC<KanbanBoardProps> = ({ pipelineId, allStages, allDeals, al
       </DndContext>
 
       <DealEditModal isOpen={isEditModalOpen} onClose={handleCloseEditModal} deal={selectedDeal} />
-      {/* FIX: Render the Create Modal and pass its state and handlers */}
       <DealCreateModal
         isOpen={isCreateModalOpen}
         onClose={handleCloseCreateModal}

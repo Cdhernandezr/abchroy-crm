@@ -1,7 +1,51 @@
+/* app/dashboard/Dashboard.module.css */
+
+.header {
+  margin-bottom: 24px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoImage {
+  border-radius: 8px; /* Opcional: para redondear las esquinas si tu logo es cuadrado */
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: .3px;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--brand-muted);
+  margin-top: -2px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .pipelineSelect {
   background-color: var(--brand-dark-blue);
-  border: 1px solid rgba(114, 120, 242, 0.2); /* brand-accent/20 */
-  border-radius: 8px;
+  border: 1px solid rgba(114, 120, 242, 0.2);
+  border-radius: 12px;
   padding: 8px 12px;
   color: var(--brand-light);
   font-weight: 600;
@@ -17,4 +61,34 @@
 .pipelineSelect:focus {
   outline: none;
   box-shadow: 0 0 0 2px var(--brand-accent);
+}
+
+.analyticsButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--brand-muted);
+  background-color: var(--brand-dark-blue);
+  border: 1px solid rgba(114, 120, 242, 0.2); /* brand-accent con transparencia */
+  border-radius: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.analyticsButton:hover {
+  background-color: rgba(114, 120, 242, 0.1);
+  color: var(--brand-light);
+  border-color: rgba(114, 120, 242, 0.4);
+}
+
+.analyticsButton svg {
+  transition: transform 0.2s ease;
+}
+
+.analyticsButton:hover svg {
+  transform: scale(1.1);
 }

@@ -4,9 +4,9 @@ import { FC } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 // 1. Importamos nuestros nuevos estilos
 import styles from './DealCard.module.css' 
+import type { Deal, UserProfile } from '@/lib/analyticsHelpers'
 
-type UserProfile = { id: string; name: string | null; avatar: string | null; };
-type Deal = { id: string; title: string; value: number | null; owner_id: string | null; };
+
 interface DealCardProps { dealId: string; deal: Deal; owner: UserProfile | undefined; isOverlay?: boolean; onClick: () => void; }
 
 const DealCard: FC<DealCardProps> = ({ dealId, deal, owner, isOverlay = false, onClick }) => {

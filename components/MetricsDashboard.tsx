@@ -2,73 +2,87 @@
 'use client'
 
 import { FC, useMemo } from 'react'
-import { TrendingUp, Target, DollarSign, Clock } from 'lucide-react'
-// Importamos los nuevos estilos
+import { TrendingUp, Target, DollarSign, Clock, Package } from 'lucide-react'
 import styles from './MetricsDashboard.module.css'
+import type { Deal, Stage } from '@/lib/analyticsHelpers'
 
 
-type Deal = {
-  value: number | null;
-  status: string;
-  created_at: string;
-  closed_at: string | null;
-}
+interface MetricsDashboardProps { deals: Deal[]; stages: Stage[]; }
 
-interface MetricsDashboardProps {
-  deals: Deal[];
-}
-
-const MetricCard: FC<{ title: string; value: string; icon: React.ReactNode }> = ({ title, value, icon }) => (
+// --- Sub-componente MetricCard ---
+const MetricCard: FC<{ title: string; value: string; deltaText: string; deltaClass: string }> = ({ title, value, deltaText, deltaClass }) => (
   <div className={styles.card}>
-    <div className={styles.iconWrapper}>{icon}</div>
+    {/* <div className={styles.iconWrapper}>{icon}</div> */}
     <div>
       <p className={styles.label}>{title}</p>
       <p className={styles.value}>{value}</p>
+      <div className={`${styles.delta} ${styles.up}`}>{deltaText}</div>
     </div>
   </div>
 )
 
-
-const MetricsDashboard: FC<MetricsDashboardProps> = ({ deals }) => {
-  // Usamos useMemo para que las métricas solo se recalculen si los 'deals' cambian
+// --- Componente principal con la lógica de cálculo mejorada ---
+const MetricsDashboard: FC<MetricsDashboardProps> = ({ deals, stages }) => {
+  // 3. LA LÓGICA DE CÁLCULO AHORA USA 'stages' Y 'std_map'
   const metrics = useMemo(() => {
-    const wonDeals = deals.filter(d => d.status === 'Cerrada' && d.closed_at !== null && (d.value || 0) > 0);
-    const lostDeals = deals.filter(d => d.status === 'Cerrada' && d.closed_at !== null && (d.value || 0) === 0); // Asumiendo que perdidos tienen valor 0 o se marcan de otra forma
+    // Función auxiliar interna para determinar el estado, igual que en las analíticas
+    const getStatus = (deal: Deal) => {
+      const stage = stages.find(s => s.id === deal.stage_id);
+      if (stage?.std_map === 'Ganado') return 'won';
+      if (stage?.std_map === 'Perdido') return 'lost';
+      return 'open';
+    };
 
-    // 1. Tasa de Conversión
+    const wonDeals = deals.filter(d => getStatus(d) === 'won');
+    const lostDeals = deals.filter(d => getStatus(d) === 'lost');
+    const openDeals = deals.filter(d => getStatus(d) === 'open');
+    const createdToday = deals.filter(d => {
+      const createdAt = new Date(d.created_at);
+      const today = new Date();
+      return createdAt.toDateString() === today.toDateString();
+    }).length;
+
+    // KPI 1: Tasa de Conversión (Ganado vs. Perdido)
     const totalClosed = wonDeals.length + lostDeals.length;
     const conversionRate = totalClosed > 0 ? (wonDeals.length / totalClosed) * 100 : 0;
 
-    // 2. Valor Promedio de Trato
+    // KPI 2: Valor Promedio por Trato Ganado
     const totalValueWon = wonDeals.reduce((sum, deal) => sum + (deal.value || 0), 0);
     const averageDealValue = wonDeals.length > 0 ? totalValueWon / wonDeals.length : 0;
 
-    // 3. Ciclo de Venta Promedio (en días)
-    let totalSalesCycleDays = 0;
-    wonDeals.forEach(deal => {
-      const creationDate = new Date(deal.created_at).getTime();
-      const closingDate = new Date(deal.closed_at!).getTime();
-      const diffDays = (closingDate - creationDate) / (1000 * 3600 * 24);
-      totalSalesCycleDays += diffDays;
-    });
-    const averageSalesCycle = wonDeals.length > 0 ? totalSalesCycleDays / wonDeals.length : 0;
+    // KPI 3: Valor en Pipeline (solo oportunidades abiertas)
+    const pipelineValue = openDeals.reduce((sum, deal) => sum + (deal.value || 0), 0);
+
+    // KPI 4: Total de Oportunidades (en el pipeline actual)
+    const totalOpportunities = deals.length;
 
     return {
-      conversionRate: `${conversionRate.toFixed(1)}%`,
-      averageDealValue: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(averageDealValue),
-      averageSalesCycle: `${averageSalesCycle.toFixed(1)} días`,
-      totalValueWon: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(totalValueWon)
-    }
-  }, [deals])
+      totalOpportunities: String(totalOpportunities),
+      createdTodayText: `+${createdToday} hoy`,
+      pipelineValueText: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(pipelineValue),
+      conversionRateText: `${conversionRate.toFixed(0)}%`,
+      averageDealValueText: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(averageDealValue),
+    };
+  }, [deals, stages]); // El cálculo se re-ejecuta si cambian los deals o las etapas
 
   return (
     <div className={styles.grid}>
-      <MetricCard title="Tasa de Conversión" value={metrics.conversionRate} icon={<Target size={24} />} />
-      <MetricCard title="Valor Total Ganado" value={metrics.totalValueWon} icon={<DollarSign size={24} />} />
-      <MetricCard title="Ciclo de Venta Promedio" value={metrics.averageSalesCycle} icon={<Clock size={24} />} />
-      <MetricCard title="Valor Promedio por Trato" value={metrics.averageDealValue} icon={<TrendingUp size={24} />} />
+      <MetricCard title="Oportunidades" value={metrics.totalOpportunities} deltaText={metrics.createdTodayText} deltaClass={styles.up} />
+      <MetricCard title="Valor en Pipeline" value={metrics.pipelineValueText} deltaText="En etapas abiertas" deltaClass="" />
+      <MetricCard title="Tasa de Conversión" value={metrics.conversionRateText} deltaText="Ganado vs. Cerrado" deltaClass="" />
+      <MetricCard title="Valor Promedio Ganado" value={metrics.averageDealValueText} deltaText="Promedio por trato" deltaClass="" />
     </div>
   )
 }
+
+/*   return (
+    <div className={styles.grid}>
+      <MetricCard 
+        title="Oportunidades" 
+        value={metrics.totalOpportunities} 
+        deltaText={metrics.createdTodayText} 
+        icon={<Package size={24} />} 
+      /> */
+
 
 export default MetricsDashboard

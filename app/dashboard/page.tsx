@@ -1,140 +1,159 @@
-/* app/dashboard/page.tsx */
+//app/dashboard/page.tsx
 'use client'
-
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useQuery } from '@tanstack/react-query'
 import KanbanBoard from '@/components/KanbanBoard'
 import MetricsDashboard from '@/components/MetricsDashboard'
 import LogoutButton from '@/components/LogoutButton'
-import { LayoutDashboard } from 'lucide-react' 
+import { LayoutDashboard, BarChart2 } from 'lucide-react'
 import styles from './Dashboard.module.css'
+import type { Deal, Stage, UserProfile, Account } from '@/lib/analyticsHelpers' 
+import Image from 'next/image'
+
+// Definimos la forma de los datos que esperamos de la API
+interface KanbanData {
+  pipelines: { id: string; name: string }[];
+  stages: Stage[];
+  deals: Deal[];
+  users: UserProfile[];
+  accounts: Account[];
+}
 
 export default function DashboardPage() {
-  const supabase = createClient()
-  const router = useRouter()
-
-  // Estado para gestionar el pipeline activo
   const [selectedPipelineId, setSelectedPipelineId] = useState<string | null>(null);
+  const supabase = createClient();
+  const router = useRouter();
 
-  // Efecto para verificar la sesión del usuario al cargar la página
   useEffect(() => {
+    // La lógica de sesión no cambia
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        // Si no hay sesión, redirigir a la página de login
-        router.push('/login')
-      }
-    }
-    checkSession()
-  }, [supabase, router])
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) router.push('/login');
+    };
+    checkSession();
+  }, [supabase, router]);
 
-  // Hook de React Query para obtener todos los datos necesarios para el dashboard
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error } = useQuery<KanbanData>({
     queryKey: ['kanban-data'],
     queryFn: async () => {
-      // Hacemos todas las llamadas a la base de datos en paralelo para máxima eficiencia
+      // La lógica de fetching no cambia, solo aseguramos los tipos
       const [pipelinesRes, stagesRes, dealsRes, usersRes, accountsRes] = await Promise.all([
-        supabase.from('pipelines').select('*'),
+        supabase.from('pipelines').select('id, name'),
         supabase.from('stages').select('*'),
         supabase.from('deals').select('*'),
         supabase.from('users').select('id, name, avatar'),
-        supabase.from('accounts').select('id, name')
-      ])
+        supabase.from('accounts').select('id, name, sector')
+      ]);
+      // Manejo de errores para cada una de las consultas
+      if (pipelinesRes.error) throw new Error(pipelinesRes.error.message);
+      if (stagesRes.error) throw new Error(stagesRes.error.message);
+      if (dealsRes.error) throw new Error(dealsRes.error.message);
+      if (usersRes.error) throw new Error(usersRes.error.message);
+      if (accountsRes.error) throw new Error(accountsRes.error.message);
 
-      // Manejo de errores para cada una de las peticiones
-      if (pipelinesRes.error) throw new Error(pipelinesRes.error.message)
-      if (stagesRes.error) throw new Error(stagesRes.error.message)
-      if (dealsRes.error) throw new Error(dealsRes.error.message)
-      if (usersRes.error) throw new Error(usersRes.error.message)
-      if (accountsRes.error) throw new Error(accountsRes.error.message)
-
-      // Si todo es exitoso, devolvemos un objeto con todos los datos
-      return {
-        pipelines: pipelinesRes.data,
-        stages: stagesRes.data,
-        deals: dealsRes.data,
-        users: usersRes.data,
-        accounts: accountsRes.data
-      }
+      return { pipelines: pipelinesRes.data, stages: stagesRes.data, deals: dealsRes.data, users: usersRes.data, accounts: accountsRes.data };
     },
   });
   
-  // Efecto para establecer el pipeline por defecto una vez que los datos han cargado
+  // Hook para establecer el primer pipeline como seleccionado por defecto cuando los datos cargan
   useEffect(() => {
     if (!selectedPipelineId && data && data.pipelines.length > 0) {
-      // Seleccionamos el primer pipeline de la lista como activo
       setSelectedPipelineId(data.pipelines[0].id);
     }
   }, [data, selectedPipelineId]);
 
-  // Manejo del estado de carga inicial
+  // CORRECCIÓN 1: Lógica de filtrado simplificada y más robusta
+  const dealsForSelectedPipeline = useMemo(() => {
+    // Si no hay datos o pipeline seleccionado, devolvemos un array vacío
+    if (!data || !selectedPipelineId) {
+      return [];
+    }
+    // Filtramos los deals directamente por su pipeline_id. ¡Mucho más simple!
+    return data.deals.filter(deal => deal.pipeline_id === selectedPipelineId);
+  }, [data, selectedPipelineId]);
+
+  // CORRECCIÓN 2: Guard Clauses para manejar los estados de carga
   if (isLoading) {
-    return <div className="p-8 text-center text-gray-400">Cargando dashboard...</div>
+    return <div className="p-8 text-center">Cargando dashboard...</div>;
   }
 
-  // Manejo de errores en la obtención de datos
   if (isError) {
-    return <div className="p-8 text-center text-red-500">Error al cargar el tablero: {error.message}</div>
+    return <div className="p-8 text-center text-red-400">Error: {error.message}</div>;
   }
-
-  // Manejo del estado vacío: si no hay pipelines, mostramos un mensaje de bienvenida y un llamado a la acción
-  if (!data || data.pipelines.length === 0) {
-    return (
-      <main className="p-8 flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
-        <div className="text-center">
-            <LayoutDashboard size={48} className="text-gray-500 mb-4 mx-auto" />
-            <h2 className="text-2xl font-bold mb-2">Bienvenido a tu CRM</h2>
-            <p className="text-gray-400 mb-6">Parece que aún no tienes pipelines. ¡Crea uno para empezar a gestionar tus oportunidades!</p>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors">
-            Crear tu Primer Pipeline
-            </button>
-        </div>
-      </main>
-    )
+  
+  // Si no hay datos (incluso después de cargar), mostramos un estado vacío
+  if (!data || !selectedPipelineId) {
+    return <div className="p-8 text-center">No hay datos de pipeline disponibles.</div>;
   }
 
   return (
-        <main className="p-4 sm:p-6 lg:p-8 min-h-screen">
-      <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-        <h1 className="text-3xl font-bold text-brand-light">Dashboard de Ventas</h1>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center">
-            <label htmlFor="pipeline-select" className="text-sm text-brand-muted mr-2">Pipeline:</label>
+    <main className="p-4 sm:p-6 lg:p-8 min-h-screen">
+      <header className={styles.header}>
+        <div className={styles.topbar}>
+          <div className={styles.titleGroup}>
+
+                {/* 2. Reemplazamos el div decorativo por el componente Image */}
+                <Image
+                  src="/logo.png"
+                  alt="Logo de ABCHROY"
+                  width={116}
+                  height={66}
+                  className={styles.logoImage} // Usamos la clase para darle el tamaño y radio
+                  priority // Ayuda a que el logo cargue más rápido
+                />
+
+            <div>
+              <h1 className={styles.title}>CRM ABCHROY</h1>
+              <p className={styles.subtitle}>Gestión de Oportunidades y Pipeline</p>
+            </div>
+          </div>
+          <div className={styles.actions}>
+            <Link 
+              href={`/analytics?pipelineId=${selectedPipelineId}`} 
+              className={styles.analyticsButton}
+            >
+              <BarChart2 size={16} />
+              Analíticas
+            </Link>
             <select
               id="pipeline-select"
               value={selectedPipelineId || ''}
               onChange={(e) => setSelectedPipelineId(e.target.value)}
-              // FIX: Apply the new style
               className={styles.pipelineSelect}
             >
               {data.pipelines.map(pipeline => (
                 <option key={pipeline.id} value={pipeline.id}>{pipeline.name}</option>
               ))}
             </select>
+            <LogoutButton />
           </div>
-          <LogoutButton />
         </div>
-      </div>
-      
-      <MetricsDashboard deals={data.deals} />
-
-      <h2 className="text-2xl font-bold mb-4 mt-8">
-        {data.pipelines.find(p => p.id === selectedPipelineId)?.name}
-      </h2>
-      
-      {/* Renderizado condicional del Kanban para asegurar que selectedPipelineId no sea nulo */}
-      {selectedPipelineId && (
-        <KanbanBoard
-          key={selectedPipelineId} // Forza el re-renderizado al cambiar de pipeline
-          pipelineId={selectedPipelineId}
-          allStages={data.stages}
-          allDeals={data.deals}
-          allUsers={data.users}
-          allAccounts={data.accounts}
+        {/* Pasamos los deals ya filtrados para que las métricas sean correctas */}
+        <MetricsDashboard 
+          deals={dealsForSelectedPipeline} 
+          stages={data.stages} 
         />
-      )}
+      </header>
+      
+      <section>
+        <h2 className="text-2xl font-bold mb-4 mt-8 text-brand-light">
+          {data.pipelines.find(p => p.id === selectedPipelineId)?.name}
+        </h2>
+        {/* Renderizamos el Kanban solo cuando tenemos todos los datos necesarios */}
+        {selectedPipelineId && (
+          // CORRECCIÓN 3: Pasamos las props con la seguridad de que 'data' existe
+          <KanbanBoard
+            key={selectedPipelineId}
+            pipelineId={selectedPipelineId}
+            initialDeals={dealsForSelectedPipeline}
+            allStages={data.stages}
+            allUsers={data.users}
+            allAccounts={data.accounts} allDeals={[]}          />
+        )}
+      </section>
     </main>
-  )
+  );
 }

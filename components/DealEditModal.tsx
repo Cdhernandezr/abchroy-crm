@@ -9,9 +9,10 @@ import toast from 'react-hot-toast'
 import { X } from 'lucide-react'
 // Importamos los estilos del modal unificado
 import styles from './Modal.module.css'
+import type { Deal } from '@/lib/analyticsHelpers'
 
 // Tipos
-type Deal = { id: string; title: string; value: number | null; pain: string | null; }
+//type Deal = { id: string; title: string; value: number | null; pain: string | null; }
 interface DealEditModalProps { isOpen: boolean; onClose: () => void; deal: Deal | null; }
 type DealFormData = { title: string; value: number; pain: string; }
 
