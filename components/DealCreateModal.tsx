@@ -7,13 +7,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 import { X } from 'lucide-react'
-// Importamos los nuevos estilos del modal
 import styles from './Modal.module.css'
 
 // Tipos
 type Account = { id: string; name: string; }
 interface DealCreateModalProps { isOpen: boolean; onClose: () => void; stageId: string | null; pipelineId: string; accounts: Account[]; }
-type DealFormData = { title: string; account_id: string; }
+type DealFormData = { title: string; account_id: string; value: number; source: string; expected_close_date: string; probability: number; }
 
 const DealCreateModal: FC<DealCreateModalProps> = ({ isOpen, onClose, stageId, pipelineId, accounts }) => {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<DealFormData>();
@@ -21,10 +20,19 @@ const DealCreateModal: FC<DealCreateModalProps> = ({ isOpen, onClose, stageId, p
   const queryClient = useQueryClient();
 
   const createDeal = useMutation({
-    mutationFn: async ({ title, account_id }: DealFormData) => {
+    // 2. La mutación ahora recibe todos los nuevos datos
+    mutationFn: async (formData: DealFormData) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!stageId || !user) throw new Error("Faltan datos para crear la oportunidad.");
-      const { error } = await supabase.from('deals').insert({ title, account_id, stage_id: stageId, pipeline_id: pipelineId, owner_id: user.id });
+      const dataToInsert = {
+        ...formData,
+        expected_close_date: formData.expected_close_date || null,
+        stage_id: stageId,
+        pipeline_id: pipelineId,
+        owner_id: user.id
+      };
+
+      const { error } = await supabase.from('deals').insert(dataToInsert);
       if (error) throw new Error(error.message);
     },
     onSuccess: () => {
@@ -32,10 +40,10 @@ const DealCreateModal: FC<DealCreateModalProps> = ({ isOpen, onClose, stageId, p
       queryClient.invalidateQueries({ queryKey: ['kanban-data'] });
       onClose();
     },
-    onError: (error) => toast.error(`Error: ${error.message}`)
+    onError: (error: Error) => toast.error(`Error: ${error.message}`)
   });
 
-  useEffect(() => { if (!isOpen) reset({ title: '', account_id: '' }); }, [isOpen, reset]);
+  useEffect(() => { if (!isOpen) reset(); }, [isOpen, reset]);
 
   if (!isOpen) return null;
 
@@ -49,20 +57,59 @@ const DealCreateModal: FC<DealCreateModalProps> = ({ isOpen, onClose, stageId, p
         
         <form onSubmit={handleSubmit(data => createDeal.mutate(data))}>
           <div className={styles.formGrid}>
-            <div className={styles.field}>
-              <label htmlFor="title">Título de la Oportunidad</label>
-              <input id="title" {...register('title', { required: 'El título es obligatorio' })} />
-              {/* Aquí podrías añadir un mensaje de error si lo deseas */}
+            <div className={`${styles.field} ${styles.fullWidth}`}>
+              <label htmlFor="create-title">Título de la Oportunidad</label>
+                <input 
+                  id="create-title" 
+                  {...register('title', { required: 'El título es obligatorio' })} 
+                />
+                {errors.title && <p className={styles.errorMessage}>{errors.title.message}</p>}
             </div>
 
             <div className={styles.field}>
-              <label htmlFor="account_id">Cuenta / Empresa</label>
-              <select id="account_id" {...register('account_id', { required: 'Debes seleccionar una cuenta' })}>
+              <label htmlFor="create-account_id">Cuenta / Empresa</label>
+              <select id="create-account_id" {...register('account_id', { required: true })}>
                 <option value="">-- Selecciona una cuenta --</option>
                 {accounts.map(acc => (
                   <option key={acc.id} value={acc.id}>{acc.name}</option>
                 ))}
               </select>
+            </div>
+            
+            <div className={styles.field}>
+              <label htmlFor="create-value">Valor (COP)</label>
+              <input id="create-value" type="number" {...register('value', { 
+                  required: 'El valor es obligatorio',
+                  valueAsNumber: true,
+                  min: { value: 1, message: 'El valor debe ser positivo' }
+              })} />
+              {errors.value && <p className={styles.errorMessage}>{errors.value.message}</p>}
+            </div>
+
+            <div className={styles.field}>
+              <label htmlFor="create-source">Fuente / Origen</label>
+              <select id="create-source" {...register('source')}>
+                <option value="">-- Selecciona una fuente --</option>
+                <option value="Referido">Referido</option>
+                <option value="Página Web">Página Web</option>
+                <option value="Llamada en frío">Llamada en frío</option>
+                <option value="Feria comercial">Feria comercial</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+
+            <div className={styles.field}>
+              <label htmlFor="create-probability">Probabilidad (%)</label>
+              <input id="create-probability" type="number" min="0" max="100" {...register('probability', { valueAsNumber: true })} />
+            </div>
+            
+            <div className={`${styles.field} ${styles.fullWidth}`}>
+              <label htmlFor="create-expected_close_date">Fecha de Cierre Estimada</label>
+              {/* 3. AÑADIMOS REGLA DE VALIDACIÓN */}
+              <input id="create-expected_close_date" type="date" {...register('expected_close_date', {
+                  required: 'La fecha de cierre es obligatoria'
+              })} />
+              {errors.expected_close_date && <p className={styles.errorMessage}>{errors.expected_close_date.message}</p>}
             </div>
           </div>
 

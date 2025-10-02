@@ -7,24 +7,38 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 import { X } from 'lucide-react'
-// Importamos los estilos del modal unificado
 import styles from './Modal.module.css'
 import type { Deal } from '@/lib/analyticsHelpers'
 
 // Tipos
 //type Deal = { id: string; title: string; value: number | null; pain: string | null; }
 interface DealEditModalProps { isOpen: boolean; onClose: () => void; deal: Deal | null; }
-type DealFormData = { title: string; value: number; pain: string; }
+type DealFormData = { title: string; value: number; pain: string; source: string; expected_close_date: string; probability: number; next_steps: string; }
+
+const formatDateForInput = (dateString: string | null) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];
+}
+
 
 const DealEditModal: FC<DealEditModalProps> = ({ isOpen, onClose, deal }) => {
-  const { register, handleSubmit, reset } = useForm<DealFormData>();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<DealFormData>();
   const supabase = createClient();
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    // Sincroniza el formulario con los datos del 'deal' seleccionado
+useEffect(() => {
+    // 2. Sincronizamos el formulario con TODOS los datos del 'deal'
     if (deal) {
-      reset({ title: deal.title || '', value: deal.value || 0, pain: deal.pain || '' });
+      reset({
+        title: deal.title || '',
+        value: deal.value || 0,
+        pain: deal.pain || '',
+        source: deal.source || '',
+        expected_close_date: formatDateForInput(deal.expected_close_date),
+        probability: deal.probability || 0,
+        next_steps: deal.next_steps || '',
+      });
     }
   }, [deal, reset]);
 
@@ -32,7 +46,12 @@ const DealEditModal: FC<DealEditModalProps> = ({ isOpen, onClose, deal }) => {
   const updateDeal = useMutation({
     mutationFn: async (updatedData: DealFormData) => {
       if (!deal) throw new Error("No hay oportunidad para actualizar");
-      const { error } = await supabase.from('deals').update(updatedData).eq('id', deal.id);
+      const dataToUpdate = {
+        ...updatedData,
+        expected_close_date: updatedData.expected_close_date || null,
+      };
+
+      const { error } = await supabase.from('deals').update(dataToUpdate).eq('id', deal.id);
       if (error) throw new Error(error.message);
     },
     onSuccess: () => {
@@ -75,20 +94,56 @@ const DealEditModal: FC<DealEditModalProps> = ({ isOpen, onClose, deal }) => {
         </div>
         
         <form onSubmit={handleSubmit(data => updateDeal.mutate(data))}>
-          <div className={`${styles.field} ${styles.fullWidth}`}>
-            <label htmlFor="edit-title">Título</label>
-            <input id="edit-title" {...register('title', { required: true })} />
-          </div>
+          <div className={styles.formGrid}>
+            <div className={`${styles.field} ${styles.fullWidth}`}>
+              <label htmlFor="edit-title">Título</label>
+              <input id="edit-title" {...register('title', { required: true })} />
+            </div>
 
-          <div className={styles.formGrid} style={{marginTop: '16px'}}>
             <div className={styles.field}>
-              <label htmlFor="edit-value">Valor</label>
-              <input id="edit-value" type="number" {...register('value', { valueAsNumber: true })} />
+              <label htmlFor="edit-value">Valor (COP)</label>
+              <input id="edit-value" type="number" {...register('value', { 
+                  required: 'El valor es obligatorio',
+                  valueAsNumber: true,
+                  min: { value: 1, message: 'El valor debe ser positivo' }
+              })} />
+              {errors.value && <p className={styles.errorMessage}>{errors.value.message}</p>}
+            </div>
+
+            <div className={styles.field}>
+                <label htmlFor="edit-probability">Probabilidad (%)</label>
+                <input id="edit-probability" type="number" min="0" max="100" {...register('probability', { valueAsNumber: true })} />
+            </div>
+
+            <div className={styles.field}>
+              <label htmlFor="edit-source">Fuente / Origen</label>
+              <select id="edit-source" {...register('source')}>
+                <option value="">-- Selecciona una fuente --</option>
+                <option value="Referido">Referido</option>
+                <option value="Página Web">Página Web</option>
+                <option value="Llamada en frío">Llamada en frío</option>
+                <option value="Feria comercial">Feria comercial</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+
+            <div className={styles.field}>
+              <label htmlFor="edit-expected_close_date">Fecha de Cierre Estimada</label>
+              {/* 3. AÑADIMOS REGLA DE VALIDACIÓN */}
+              <input id="edit-expected_close_date" type="date" {...register('expected_close_date', {
+                  required: 'La fecha de cierre es obligatoria'
+              })} />
+              {errors.expected_close_date && <p className={styles.errorMessage}>{errors.expected_close_date.message}</p>}
             </div>
 
             <div className={`${styles.field} ${styles.fullWidth}`}>
               <label htmlFor="edit-pain">Dolor del Cliente</label>
               <textarea id="edit-pain" {...register('pain')} />
+            </div>
+
+            <div className={`${styles.field} ${styles.fullWidth}`}>
+              <label htmlFor="edit-next_steps">Próximos Pasos</label>
+              <textarea id="edit-next_steps" {...register('next_steps')} />
             </div>
           </div>
           

@@ -65,11 +65,11 @@
 }
 
 .pipelineSelect {
-  background-color: var(--brand-dark-blue);
+  background-color: var(--brand-card);
   border: 1px solid rgba(114, 120, 242, 0.2); /* brand-accent con transparencia */
   border-radius: 12px;
   padding: 8px 12px;
-  color: var(--brand-light);
+  color: var(--brand-muted);
   font-weight: 600;
   -webkit-appearance: none;
   appearance: none;

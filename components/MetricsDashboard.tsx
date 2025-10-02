@@ -1,17 +1,14 @@
-// components/MetricsDashboard.tsx
 'use client'
 
-import { FC, useMemo } from 'react'
+import { FC, useMemo,useState  } from 'react'
 import styles from './MetricsDashboard.module.css'
 import type { Deal, Stage } from '@/lib/analyticsHelpers'
+import { calculateWeightedForecast } from '@/lib/analyticsHelpers' 
+import { RefreshCw } from 'lucide-react'
 
-
-interface MetricsDashboardProps { deals: Deal[]; stages: Stage[]; }
-
-// --- Sub-componente MetricCard ---
+// El sub-componente MetricCard se mantiene igual.
 const MetricCard: FC<{ title: string; value: string; deltaText: string; deltaClass: string }> = ({ title, value, deltaText, deltaClass }) => (
   <div className={styles.card}>
-    {/* <div className={styles.iconWrapper}>{icon}</div> */}
     <div>
       <p className={styles.label}>{title}</p>
       <p className={styles.value}>{value}</p>
@@ -20,11 +17,15 @@ const MetricCard: FC<{ title: string; value: string; deltaText: string; deltaCla
   </div>
 )
 
-// --- Componente principal con la lógica de cálculo mejorada ---
+interface MetricsDashboardProps {
+  deals: Deal[];
+  stages: Stage[];
+}
+
 const MetricsDashboard: FC<MetricsDashboardProps> = ({ deals, stages }) => {
-  // 3. LA LÓGICA DE CÁLCULO AHORA USA 'stages' Y 'std_map'
+  const [showForecast, setShowForecast] = useState(false);
   const metrics = useMemo(() => {
-    // Función auxiliar interna para determinar el estado, igual que en las analíticas
+    // La función auxiliar para determinar el estado no cambia.
     const getStatus = (deal: Deal) => {
       const stage = stages.find(s => s.id === deal.stage_id);
       if (stage?.std_map === 'Ganado') return 'won';
@@ -41,35 +42,72 @@ const MetricsDashboard: FC<MetricsDashboardProps> = ({ deals, stages }) => {
       return createdAt.toDateString() === today.toDateString();
     }).length;
 
-    // KPI 1: Tasa de Conversión (Ganado vs. Perdido)
+    // --- CÁLCULOS DE KPI ---
+
+    // KPI : Total de Oportunidades 
+    const totalOpportunities = deals.length;
+
+    // KPI: Previsión Ponderada
+    const weightedForecast = calculateWeightedForecast(deals, stages);
+
+    // KPI : Valor en Pipeline 
+    const pipelineValue = openDeals.reduce((sum, deal) => sum + (deal.value || 0), 0);
+
+    // KPI : Tasa de Conversión 
     const totalClosed = wonDeals.length + lostDeals.length;
     const conversionRate = totalClosed > 0 ? (wonDeals.length / totalClosed) * 100 : 0;
 
-    // KPI 2: Valor Promedio por Trato Ganado
-    const totalValueWon = wonDeals.reduce((sum, deal) => sum + (deal.value || 0), 0);
-    const averageDealValue = wonDeals.length > 0 ? totalValueWon / wonDeals.length : 0;
+    // KPI : Edad Promedio de Oportunidades ABIERTAS
+    const totalAgeInDays = openDeals.reduce((sum, deal) => {
+        const creationDate = new Date(deal.created_at).getTime();
+        const today = new Date().getTime();
+        // Calculamos la diferencia en milisegundos y la convertimos a días
+        const ageInDays = (today - creationDate) / (1000 * 3600 * 24);
+        return sum + ageInDays;
+    }, 0);
+    // Calculamos el promedio
+    const averageAge = openDeals.length > 0 ? totalAgeInDays / openDeals.length : 0;
 
-    // KPI 3: Valor en Pipeline (solo oportunidades abiertas)
-    const pipelineValue = openDeals.reduce((sum, deal) => sum + (deal.value || 0), 0);
-
-    // KPI 4: Total de Oportunidades (en el pipeline actual)
-    const totalOpportunities = deals.length;
-
+    // Devolvemos los valores formateados para la UI
     return {
       totalOpportunities: String(totalOpportunities),
       createdTodayText: `+${createdToday} hoy`,
       pipelineValueText: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(pipelineValue),
+      weightedForecastText: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(weightedForecast),
       conversionRateText: `${conversionRate.toFixed(0)}%`,
-      averageDealValueText: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(averageDealValue),
+      averageAgeText: `${averageAge.toFixed(0)}d`,
     };
-  }, [deals, stages]); // El cálculo se re-ejecuta si cambian los deals o las etapas
+  }, [deals, stages]);
 
   return (
     <div className={styles.grid}>
       <MetricCard title="Oportunidades" value={metrics.totalOpportunities} deltaText={metrics.createdTodayText} deltaClass={styles.up} />
-      <MetricCard title="Valor en Pipeline" value={metrics.pipelineValueText} deltaText="En etapas abiertas" deltaClass="" />
+      {/* <MetricCard title="Valor en Pipeline" value={metrics.pipelineValueText} deltaText="En etapas abiertas" deltaClass="" /> */}
+      <div className={styles.card}>
+        <div className={styles.labelContainer}>
+          <p className={styles.label}>
+            {showForecast ? "Previsión Ponderada" : "Valor en Pipeline"}
+          </p>
+          <label className={styles.toggleSwitch}>
+            <input 
+              type="checkbox" 
+              checked={showForecast} 
+              onChange={() => setShowForecast(!showForecast)} 
+            />
+            <span className={styles.track}>
+              <span className={styles.thumb}></span>
+            </span>
+          </label>
+        </div>
+        <p className={styles.value}>
+          {showForecast ? metrics.weightedForecastText : metrics.pipelineValueText}
+        </p>
+        <div className={styles.delta}> {/* CORRECCIÓN: Ahora usará el color --brand-muted por defecto */}
+          {showForecast ? "Estimación para este mes" : "Suma de oportunidades abiertas"}
+        </div>
+      </div>
       <MetricCard title="Tasa de Conversión" value={metrics.conversionRateText} deltaText="Ganado vs. Cerrado" deltaClass="" />
-      <MetricCard title="Valor Promedio Ganado" value={metrics.averageDealValueText} deltaText="Promedio por trato" deltaClass="" />
+      <MetricCard title="Edad Promedio" value={metrics.averageAgeText} deltaText="Desde creación" deltaClass="" />
     </div>
   )
 }
