@@ -21,6 +21,10 @@
   cursor: grabbing;
 }
 
+.dragging { 
+  opacity: 0.3; 
+}
+
 .title {
   margin: 0 0 6px;
   font-size: 14px;

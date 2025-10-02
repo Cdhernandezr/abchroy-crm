@@ -1,8 +1,8 @@
+// components/DealCard.tsx
 'use client'
 
 import { FC } from 'react'
 import { useDraggable } from '@dnd-kit/core'
-// 1. Importamos nuestros nuevos estilos
 import styles from './DealCard.module.css' 
 import type { Deal, UserProfile } from '@/lib/analyticsHelpers'
 
