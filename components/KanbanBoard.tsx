@@ -9,12 +9,12 @@ import DealCard from './DealCard'
 import DealEditModal from './DealEditModal'
 import DealCreateModal from './DealCreateModal' 
 import styles from './KanbanBoard.module.css'
-import type { Deal, Stage, UserProfile, Account } from '@/lib/analyticsHelpers'
+import type { Deal, Stage, UserProfile, Account, Activity} from '@/lib/analyticsHelpers'
 
 
-interface KanbanBoardProps { pipelineId: string; initialDeals: Deal[]; allStages: Stage[]; allUsers: UserProfile[]; allAccounts: Account[]; }
+interface KanbanBoardProps { pipelineId: string; initialDeals: Deal[]; allStages: Stage[]; allUsers: UserProfile[]; allAccounts: Account[]; allActivities: Activity[]; }
 
-const KanbanBoard: FC<KanbanBoardProps> = ({ pipelineId, initialDeals, allStages, allUsers, allAccounts }) => {
+const KanbanBoard: FC<KanbanBoardProps> = ({ pipelineId, initialDeals, allStages, allUsers, allAccounts, allActivities  }) => {
   // --- States (no changes) ---
   const [deals, setDeals] = useState(initialDeals)
   const [activeDeal, setActiveDeal] = useState<Deal | null>(null)
@@ -121,8 +121,8 @@ return (
                       key={deal.id}
                       deal={deal}
                       owner={owner}
-                      // Y se lo pasamos a la tarjeta
                       clientName={client?.name || 'N/A'}
+                      activities={allActivities}
                       onCardClick={() => handleOpenEditModal(deal)}
                     />
                   );
@@ -137,8 +137,8 @@ return (
             <DealCard
               deal={activeDeal}
               owner={activeDealOwner}
-              // También lo pasamos al overlay para una experiencia fluida
               clientName={allAccounts.find(acc => acc.id === activeDeal.account_id)?.name || 'N/A'}
+              activities={allActivities}
               onCardClick={() => {}}
             />
           ) : null}
@@ -146,13 +146,14 @@ return (
       </DndContext>
 
       {/* Los modales no cambian */}
-      <DealEditModal isOpen={isEditModalOpen} onClose={handleCloseEditModal} deal={selectedDeal} />
+      <DealEditModal isOpen={isEditModalOpen} onClose={handleCloseEditModal} deal={selectedDeal} activities={allActivities} />
       <DealCreateModal
         isOpen={isCreateModalOpen}
         onClose={handleCloseCreateModal}
         stageId={stageForNewDealId}
         pipelineId={pipelineId}
         accounts={allAccounts}
+        
       />
     </>
   );

@@ -1,12 +1,13 @@
 //lib/analyticsHelpers.ts
 // --- Definiciones de Tipos de Datos ---
 // Definimos las "formas" de nuestros datos para trabajar de manera segura.
-export type Deal = { id: string; title: string; stage_id: string; pipeline_id: string | null; value: number | null; created_at: string; closed_at: string | null; owner_id: string | null; account_id: string | null; status: string; pain: string | null; expected_close_date: string | null; probability: number | null; source: string | null; next_steps: string | null;};
+export type Deal = { id: string; title: string; stage_id: string; pipeline_id: string | null; value: number | null; created_at: string; closed_at: string | null; owner_id: string | null; account_id: string | null; status: string; pain: string | null; expected_close_date: string | null; probability: number | null; source: string | null;};
 export type Stage = { pipeline_id: string; id: string; name: string; order: number; std_map: string | null; created_at: string; };
 export type UserProfile = { avatar: string | null; id: string; name: string | null; };
 export type Account = { id: string; name: string; sector: string | null; };
 export type Goal = { year: number; months: { [key: string]: number } };
 export type PipelineInfo = {id: string; name: string; }
+export type Activity = {id: string; deal_id: string; type: 'Llamada' | 'Reunión' | 'Email' | 'Mensaje' | 'Otro'; date_time: string; done: boolean; notes: string | null;};
 
 // --- Funciones de Procesamiento de Datos ---
 const getDealStatus = (deal: Deal, stages: Stage[]): 'won' | 'lost' | 'open' => {
