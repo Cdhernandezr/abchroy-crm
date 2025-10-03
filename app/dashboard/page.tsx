@@ -151,7 +151,7 @@ export default function DashboardPage() {
             initialDeals={dealsForSelectedPipeline}
             allStages={data.stages}
             allUsers={data.users}
-            allAccounts={data.accounts} allDeals={[]}          />
+            allAccounts={data.accounts}/>
         )}
       </section>
     </main>
