@@ -119,41 +119,27 @@ export function processSalesBySector(deals: Deal[], accounts: Account[], stages:
     return { labels: Object.keys(salesBySector), data: Object.values(salesBySector) };
 }
 
-/**
- * Compara la meta del mes actual con las ventas reales del mes actual.
- */
-/* export function processGoalVsActual(deals: Deal[], goals: Goal[], stages: Stage[]) {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = String(now.getMonth() + 1);
-    const yearGoal = goals.find(g => g.year === currentYear);
-    const monthlyGoal = yearGoal?.months?.[currentMonth] || 0;
-    const wonDealsThisMonth = deals.filter(d => {
-        if (getDealStatus(d, stages) !== 'won' || !d.closed_at) return false;
-        const closingDate = new Date(d.closed_at);
-        return closingDate.getFullYear() === currentYear && (closingDate.getMonth() + 1) === Number(currentMonth);
-    });
-    const actualSales = wonDealsThisMonth.reduce((sum, deal) => sum + (deal.value || 0), 0);
-    return { goal: monthlyGoal, actual: actualSales, percentage: monthlyGoal > 0 ? (actualSales / monthlyGoal) * 100 : 0 };
-} */
-
-/**  *Calcula la previsión ponderada para el mes actual. */
 export function calculateWeightedForecast(deals: Deal[], stages: Stage[]): number {
   const now = new Date();
-  const currentMonth = now.getMonth();
+  const currentMonth = now.getMonth(); // JS months are 0-indexed (0=Jan, 9=Oct)
   const currentYear = now.getFullYear();
 
-  // 1. Filtramos solo las oportunidades abiertas
   const openDeals = deals.filter(deal => getDealStatus(deal, stages) === 'open');
 
-  // 2. Filtramos las que se espera cerrar este mes
   const forecastDeals = openDeals.filter(deal => {
     if (!deal.expected_close_date) return false;
-    const closeDate = new Date(deal.expected_close_date);
-    return closeDate.getMonth() === currentMonth && closeDate.getFullYear() === currentYear;
+
+    // LA CORRECCIÓN: Analizamos la fecha 'YYYY-MM-DD' manualmente.
+    // Esto es inmune a los problemas de zona horaria.
+    const parts = deal.expected_close_date.split('-');
+    if (parts.length !== 3) return false; // Validación básica
+
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // Convertimos el mes a 0-indexado
+
+    return month === currentMonth && year === currentYear;
   });
 
-  // 3. Calculamos la suma ponderada
   const weightedValue = forecastDeals.reduce((sum, deal) => {
     const probability = deal.probability || 0;
     const value = deal.value || 0;
@@ -166,7 +152,6 @@ export function calculateWeightedForecast(deals: Deal[], stages: Stage[]): numbe
 
 /**
  * Compara la meta del mes actual con las ventas reales y la previsión.
- * CORREGIDO: Ahora calcula y devuelve también el valor de la previsión.
  */
 export function processGoalVsActual(deals: Deal[], goals: Goal[], stages: Stage[]) {
     const now = new Date();

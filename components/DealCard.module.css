@@ -5,8 +5,8 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 10px 30px rgba(0,0,0,.35);
   border-radius: 12px; /* --radius-sm del mockup */
-  padding: 10px;
-  margin: 8px 4px;
+  padding: 12px;
+  margin: 8px /* 4px */;
   cursor: grab;
   transition: transform .18s ease, box-shadow .18s ease;
   position: relative;
@@ -45,11 +45,24 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
   padding: 3px 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .value {
   color: var(--brand-primary);
-  font-weight: 800;
+  font-weight: 700;
+}
+
+.dueDate {
+  font-weight: 500;
+}
+
+.dueDate.overdue {
+  color: var(--brand-danger);
+  background-color: rgba(255, 107, 107, 0.1);
+  border-color: var(--brand-danger);
 }
 
 .owner {
@@ -70,4 +83,52 @@
 .owner span {
   font-size: 12px;
   color: var(--brand-muted);
+}
+
+/* Contenedor para la sección de Próximos Pasos */
+.nextStepSection {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--brand-warning); /* Color por defecto para el texto */
+  overflow: hidden;
+}
+
+/* Estilo para el texto de los próximos pasos */
+.nextStepText {
+  /* Trunca el texto si es muy largo y añade '...' */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--brand-muted); 
+  min-width: 0;
+  font-weight: 600;
+  /* min-width: 0; */ /* Permite que el texto se reduzca dentro del contenedor flex */
+}
+
+.nextStepSection svg {
+  flex-shrink: 0; /* Evita que el ícono se encoja o sea empujado */
+  color: var(--brand-warning) /* Color por defecto para el ícono */
+}
+
+/* Estilo para el estado de alerta cuando no hay próximos pasos */
+.nextStepSection.warning {
+  font-weight: 600;
+}
+
+/* Apuntamos específicamente al ÍCONO (svg) dentro de la advertencia */
+.nextStepSection.warning svg {
+  color: var(--brand-danger); 
+  flex-shrink: 0
+}
+
+/* Apuntamos específicamente al TEXTO (span) dentro de la advertencia */
+.nextStepSection.warning span {
+  /* Usamos el color de advertencia pero con un poco de transparencia para suavizarlo */
+  color: var(--brand-warning); 
+
 }

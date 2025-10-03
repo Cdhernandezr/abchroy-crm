@@ -12,9 +12,9 @@ import styles from './KanbanBoard.module.css'
 import type { Deal, Stage, UserProfile, Account } from '@/lib/analyticsHelpers'
 
 
-interface KanbanBoardProps { pipelineId: string; initialDeals: Deal[]; allStages: Stage[]; allDeals: Deal[]; allUsers: UserProfile[]; allAccounts: Account[]; }
+interface KanbanBoardProps { pipelineId: string; initialDeals: Deal[]; allStages: Stage[]; allUsers: UserProfile[]; allAccounts: Account[]; }
 
-const KanbanBoard: FC<KanbanBoardProps> = ({ pipelineId, initialDeals, allStages, allDeals, allUsers, allAccounts }) => {
+const KanbanBoard: FC<KanbanBoardProps> = ({ pipelineId, initialDeals, allStages, allUsers, allAccounts }) => {
   // --- States (no changes) ---
   const [deals, setDeals] = useState(initialDeals)
   const [activeDeal, setActiveDeal] = useState<Deal | null>(null)
@@ -97,10 +97,9 @@ const KanbanBoard: FC<KanbanBoardProps> = ({ pipelineId, initialDeals, allStages
   const stagesForPipeline = allStages.filter(stage => stage.pipeline_id === pipelineId).sort((a, b) => a.order - b.order);
   const activeDealOwner = allUsers.find(user => user.id === activeDeal?.owner_id);
 
-  return (
+return (
     <>
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        {/* 2. Reemplazamos el div anterior por el que usa nuestro estilo de grid */}
         <div className={styles.boardGrid}>
           {stagesForPipeline.map(stage => {
             const dealsForStage = deals.filter(deal => deal.stage_id === stage.id);
@@ -114,13 +113,17 @@ const KanbanBoard: FC<KanbanBoardProps> = ({ pipelineId, initialDeals, allStages
               >
                 {dealsForStage.map(deal => {
                   const owner = allUsers.find(user => user.id === deal.owner_id);
+                  // CORRECCIÓN: Buscamos el nombre del cliente
+                  const client = allAccounts.find(acc => acc.id === deal.account_id);
+                  
                   return (
                     <DealCard
                       key={deal.id}
-                      dealId={deal.id}
                       deal={deal}
                       owner={owner}
-                      onClick={() => handleOpenEditModal(deal)}
+                      // Y se lo pasamos a la tarjeta
+                      clientName={client?.name || 'N/A'}
+                      onCardClick={() => handleOpenEditModal(deal)}
                     />
                   );
                 })}
@@ -131,11 +134,18 @@ const KanbanBoard: FC<KanbanBoardProps> = ({ pipelineId, initialDeals, allStages
 
         <DragOverlay>
           {activeDeal ? (
-            <DealCard dealId={activeDeal.id} deal={activeDeal} owner={activeDealOwner} isOverlay onClick={() => {}} />
+            <DealCard
+              deal={activeDeal}
+              owner={activeDealOwner}
+              // También lo pasamos al overlay para una experiencia fluida
+              clientName={allAccounts.find(acc => acc.id === activeDeal.account_id)?.name || 'N/A'}
+              onCardClick={() => {}}
+            />
           ) : null}
         </DragOverlay>
       </DndContext>
 
+      {/* Los modales no cambian */}
       <DealEditModal isOpen={isEditModalOpen} onClose={handleCloseEditModal} deal={selectedDeal} />
       <DealCreateModal
         isOpen={isCreateModalOpen}

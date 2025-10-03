@@ -11,6 +11,7 @@
   --brand-primary: #FEA20F; /* Naranja */
   --brand-accent: #7371FF;  /* Índigo */
   --brand-success: #4CE5B1;
+  --brand-warning: rgba(255, 198, 107, 0.85);
   --brand-danger: #FF6B6B;
 }
 
