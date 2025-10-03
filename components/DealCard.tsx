@@ -1,10 +1,10 @@
 'use client'
 
-import { FC } from 'react'
+import { FC, useMemo } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import styles from './DealCard.module.css'
-import { AlertTriangle, ListTodo } from 'lucide-react'
-import type { Deal, UserProfile } from '@/lib/analyticsHelpers'
+import { AlertTriangle, Phone, Users, Mail, CheckCircle } from 'lucide-react' 
+import type { Deal, UserProfile, Activity } from '@/lib/analyticsHelpers'
 
 // Función auxiliar para calcular la edad en días
 const daysSince = (dateString: string) => {
@@ -21,19 +21,42 @@ const isOverdue = (dateString: string | null) => {
     return dueDate < today;
 }
 
+ // Objeto para mapear el tipo de actividad a su ícono correspondiente
+const activityIcons = {
+  'Llamada': <Phone size={16} />,
+  'Reunión': <Users size={16} />,
+  'Email': <Mail size={16} />,
+  'Mensaje': <Mail size={16} />,
+  'Otro': <CheckCircle size={16} />,
+};
+
 interface DealCardProps {
   deal: Deal;
   owner: UserProfile | undefined;
   clientName: string;
+  activities: Activity[];
   onCardClick: () => void;
 }
 
-const DealCard: FC<DealCardProps> = ({ deal, owner, clientName, onCardClick }) => {
+const DealCard: FC<DealCardProps> = ({ deal, owner, clientName, activities, onCardClick }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: deal.id });
   const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined;
   const cardClasses = `${styles.card} ${isDragging ? styles.dragging : ''}`;
-  
   const dueDateClass = `${styles.tag} ${styles.dueDate} ${isOverdue(deal.expected_close_date) ? styles.overdue : ''}`;
+  const nextActivity = useMemo(() => {
+    // Filtra las actividades solo para este deal y que no estén completadas
+    const pendingActivities = activities
+      .filter(act => act.deal_id === deal.id && !act.done);
+    
+    // Si no hay actividades pendientes, devuelve null
+    if (pendingActivities.length === 0) return null;
+
+    // Ordena las actividades por fecha para encontrar la más próxima en el futuro
+    pendingActivities.sort((a, b) => new Date(a.date_time).getTime() - new Date(b.date_time).getTime());
+    
+    // Devuelve la primera de la lista ordenada
+    return pendingActivities[0];
+  }, [deal.id, activities]);
 
   return (
     <div 
@@ -67,12 +90,15 @@ const DealCard: FC<DealCardProps> = ({ deal, owner, clientName, onCardClick }) =
         )}
       </div>
 
-            <div className={`${styles.nextStepSection} ${!deal.next_steps ? styles.warning : ''}`}>
-        {deal.next_steps ? (
+      <div className={`${styles.nextStepSection} ${!nextActivity ? styles.warning : ''}`}>
+        {nextActivity ? (
           <>
-            <ListTodo size={16} />
+            {activityIcons[nextActivity.type] || <CheckCircle size={16} />}
             <span className={styles.nextStepText}>
-              {deal.next_steps}
+              {nextActivity.type}
+            </span>
+            <span className={styles.nextStepDate}>
+              {new Date(nextActivity.date_time).toLocaleDateString('es-CO', { month: 'short', day: 'numeric' })}
             </span>
           </>
         ) : (
@@ -82,6 +108,7 @@ const DealCard: FC<DealCardProps> = ({ deal, owner, clientName, onCardClick }) =
           </>
         )}
       </div>
+
 
       {owner && (
         <div className={styles.owner}>

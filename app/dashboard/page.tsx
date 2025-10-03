@@ -10,7 +10,7 @@ import MetricsDashboard from '@/components/MetricsDashboard'
 import LogoutButton from '@/components/LogoutButton'
 import { LayoutDashboard, BarChart2 } from 'lucide-react'
 import styles from './Dashboard.module.css'
-import type { Deal, Stage, UserProfile, Account } from '@/lib/analyticsHelpers' 
+import type { Deal, Stage, UserProfile, Account, Activity } from '@/lib/analyticsHelpers'
 import Image from 'next/image'
 
 // Definimos la forma de los datos que esperamos de la API
@@ -20,6 +20,7 @@ interface KanbanData {
   deals: Deal[];
   users: UserProfile[];
   accounts: Account[];
+  activities: Activity[];
 }
 
 export default function DashboardPage() {
@@ -40,12 +41,13 @@ export default function DashboardPage() {
     queryKey: ['kanban-data'],
     queryFn: async () => {
       // La lógica de fetching no cambia, solo aseguramos los tipos
-      const [pipelinesRes, stagesRes, dealsRes, usersRes, accountsRes] = await Promise.all([
+      const [pipelinesRes, stagesRes, dealsRes, usersRes, accountsRes, activitiesRes] = await Promise.all([
         supabase.from('pipelines').select('id, name'),
         supabase.from('stages').select('*'),
         supabase.from('deals').select('*'),
         supabase.from('users').select('id, name, avatar'),
-        supabase.from('accounts').select('id, name, sector')
+        supabase.from('accounts').select('id, name, sector'),
+        supabase.from('activities').select('*'),
       ]);
       // Manejo de errores para cada una de las consultas
       if (pipelinesRes.error) throw new Error(pipelinesRes.error.message);
@@ -53,8 +55,9 @@ export default function DashboardPage() {
       if (dealsRes.error) throw new Error(dealsRes.error.message);
       if (usersRes.error) throw new Error(usersRes.error.message);
       if (accountsRes.error) throw new Error(accountsRes.error.message);
+      if (activitiesRes.error) throw activitiesRes.error;
 
-      return { pipelines: pipelinesRes.data, stages: stagesRes.data, deals: dealsRes.data, users: usersRes.data, accounts: accountsRes.data };
+      return { pipelines: pipelinesRes.data, stages: stagesRes.data, deals: dealsRes.data, users: usersRes.data, accounts: accountsRes.data, activities: activitiesRes.data };
     },
   });
   
@@ -151,7 +154,9 @@ export default function DashboardPage() {
             initialDeals={dealsForSelectedPipeline}
             allStages={data.stages}
             allUsers={data.users}
-            allAccounts={data.accounts}/>
+            allAccounts={data.accounts}
+            allActivities={data.activities} // ← Pasamos las actividades aquí
+          />
         )}
       </section>
     </main>
