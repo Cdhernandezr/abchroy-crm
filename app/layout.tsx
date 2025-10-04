@@ -1,18 +1,12 @@
-//app/layout.tsx
+// app/layout.tsx
 import type { Metadata } from 'next'
-import { Plus_Jakarta_Sans } from 'next/font/google' // Importamos la fuente optimizada
-import './globals.css' // **LA LÍNEA MÁS IMPORTANTE: Importa todos nuestros estilos**
+import './globals.css'
 import QueryProvider from '@/components/providers/QueryProvider'
 import { Toaster } from 'react-hot-toast'
-
-// Configuración de la fuente
-const jakarta = Plus_Jakarta_Sans({ 
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800'],
-})
+import MainLayout from '@/components/MainLayout' // Importamos el nuevo layout
 
 export const metadata: Metadata = {
-  title: 'CRM Kanban',
+  title: 'ABCHROY CRM',
   description: 'Gestiona tus oportunidades de venta',
 }
 
@@ -23,10 +17,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      {/* Aplicamos la clase de la fuente al body */}
-      <body className={jakarta.className}>
+      <body>
         <QueryProvider>
-          {children}
+          {/* Usamos MainLayout para envolver todo */}
+          <MainLayout>
+            {children}
+          </MainLayout>
           <Toaster position="top-right" />
         </QueryProvider>
       </body>

@@ -1,0 +1,98 @@
+.sidebar {
+  width: 240px;
+  background-color: var(--brand-dark-blue);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transition: width 0.3s ease-in-out;
+  z-index: 100;
+}
+
+.sidebar.collapsed {
+  width: 88px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  /* CORRECCIÓN: Cambiamos 'space-between' a 'flex-end' para alinear el botón a la derecha */
+  justify-content: flex-end; 
+  margin-bottom: 32px;
+  height: 40px; /* Mantenemos la altura para consistencia */
+}
+
+/* CORRECCIÓN: Se eliminó por completo la clase '.logo' */
+
+.toggleButton {
+  background: transparent;
+  border: none;
+  color: var(--brand-muted);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+.toggleButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.sidebar.collapsed .toggleButton {
+  margin: 0 auto;
+}
+
+/* --- El resto de los estilos (.navList, .navLink, etc.) se mantienen igual --- */
+.navList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--brand-muted);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.navLink:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--brand-light);
+}
+
+.navLink.active {
+  background-color: var(--brand-accent);
+  color: white;
+  box-shadow: 0 4px 12px rgba(114, 120, 242, 0.3);
+}
+
+.sidebar.collapsed .navLink {
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 0;
+  justify-content: center;
+  height: 72px;
+}
+
+.navLink span {
+  font-size: 14px;
+  transition: opacity 0.2s, font-size 0.2s;
+}
+
+.sidebar.collapsed .navLink span {
+  font-size: 10px;
+  font-weight: 500;
+}

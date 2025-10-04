@@ -1,14 +1,14 @@
 // app/analytics/AnalyticsClientPage.tsx
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react' 
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { processFunnelData, processSalesByPeriod, processSalespersonRanking, processSalesBySector, processGoalVsActual, processWinLossAnalysis } from '@/lib/analyticsHelpers'
-import type { Deal, Stage, UserProfile, Account, Goal, PipelineInfo } from '@/lib/analyticsHelpers' // Asumiendo que PipelineInfo está exportado
+import type { Deal, Stage, UserProfile, Account, Goal, PipelineInfo } from '@/lib/analyticsHelpers'
 
 import styles from './Analytics.module.css'
 import ChartCard from '@/components/analytics/ChartCard'
@@ -20,14 +20,15 @@ import { GoalGaugeChart } from '@/components/analytics/charts/GoalGaugeChart'
 import { WinLossChart } from '@/components/analytics/charts/WinLossChart'
 
 
-export default function AnalyticsPage() {
+export default function AnalyticsClientPage() {
   const supabase = createClient()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   
   const pipelineId = searchParams.get('pipelineId')
-    const { data: allPipelines } = useQuery<PipelineInfo[]>({
+
+  const { data: allPipelines, isLoading: isLoadingPipelines } = useQuery<PipelineInfo[]>({
     queryKey: ['all-pipelines-list'],
     queryFn: async () => {
       const { data, error } = await supabase.from('pipelines').select('id, name');
@@ -36,14 +37,22 @@ export default function AnalyticsPage() {
     },
   });
 
-  // Obtenemos todos los datos necesarios, filtrados por el pipelineId desde el servidor
-  const { data: rawData, isLoading, isError, error } = useQuery({
+  // --- LÓGICA DE SELECCIÓN AUTOMÁTICA ---
+  useEffect(() => {
+    // Si la lista de pipelines ya cargó, hay al menos uno, y NO hay un pipelineId en la URL...
+    if (allPipelines && allPipelines.length > 0 && !pipelineId) {
+      // ... entonces, actualizamos la URL con el ID del primer pipeline.
+      // Usamos 'replace' para no romper el historial del botón "atrás" del navegador.
+      router.replace(`${pathname}?pipelineId=${allPipelines[0].id}`);
+    }
+  }, [allPipelines, pipelineId, pathname, router]); // Se ejecuta cuando estos valores cambian
+
+  // Obtenemos los datos de analíticas, que dependen del pipelineId
+  const { data: rawData, isLoading: isLoadingAnalytics, isError, error } = useQuery({
     queryKey: ['analytics-data', pipelineId],
     queryFn: async () => {
       if (!pipelineId) return null;
-
       const currentYear = new Date().getFullYear();
-      
       const [dealsRes, stagesRes, usersRes, accountsRes, goalsRes] = await Promise.all([
         supabase.from('deals').select('*').eq('pipeline_id', pipelineId),
         supabase.from('stages').select('*').eq('pipeline_id', pipelineId),
@@ -101,7 +110,7 @@ export default function AnalyticsPage() {
     );
   }
 
-  if (isLoading) {
+  if (isLoadingPipelines || isLoadingAnalytics) {
     return <div className={styles.main}>Cargando datos de analíticas...</div>;
   }
 
@@ -142,7 +151,7 @@ export default function AnalyticsPage() {
       </header>
       
       {/* 5. Mostramos el estado de carga o los gráficos */}
-      {isLoading ? (
+      {isLoadingAnalytics ? (
         <div style={{textAlign: 'center', paddingTop: '50px'}}>Cargando gráficos para {selectedPipelineName}...</div>
       ) : !chartData ? (
         <div style={{textAlign: 'center', paddingTop: '50px'}}>Selecciona un pipeline para ver sus analíticas.</div>
